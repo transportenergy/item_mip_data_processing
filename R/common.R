@@ -15,7 +15,7 @@ find_data_file <- function(filename, optional = FALSE, quiet = FALSE) {
 
   extensions <- c("", ".csv", ".yaml")
   for(ex in extensions) {
-    fqfn <- system.file("extdata", paste0(filename, ex), package = "item")
+    fqfn <- system.file("extdata/model", paste0(filename, ex), package = "item")
     if(fqfn != "") {
       if(!quiet) cat("Found", fqfn, "...\n")
       return(fqfn)  # found it
