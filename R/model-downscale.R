@@ -713,7 +713,7 @@ prepare_transportenergy_t0_data <- function( country_data,
 #'   excluded elements will not be part of the reported total, and redundant categories (e.g., gasoline,
 #'   total liquid fuels) will be double counted.
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr group_by_ summarise ungroup bind_rows
+#' @importFrom dplyr distinct group_by_ summarise ungroup bind_rows
 #' @importFrom magrittr "%>%"
 #' @export
 aggregate_all_permutations <- function(input_data,
@@ -756,7 +756,13 @@ aggregate_all_permutations <- function(input_data,
                                    .dots = lapply(group_columns, as.symbol)) %>%
       summarise(value = sum(value)) %>%
       ungroup()
-    output_data <- bind_rows(output_data, output_aggregated_tech)
+
+    # Some of the model-provided categories may be dropped at this stage
+    tech_fuel_to_drop <- filter(tech_fuel_aggregations, Drop_orig) %>%
+      select(tech_fuel_joinvars) %>%
+      distinct()
+    output_data <- anti_join(output_data, tech_fuel_to_drop, by = tech_fuel_joinvars) %>%
+      bind_rows(output_aggregated_tech)
   }
 
   # Perform the individually aggregated (collapsed) variables
