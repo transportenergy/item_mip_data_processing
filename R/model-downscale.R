@@ -11,7 +11,7 @@
 #'   submissions version number, and the extension ".csv". The function will pull the data with the highest version
 #'   number.
 #' @importFrom tidyr gather
-#' @importFrom dplyr matches mutate
+#' @importFrom dplyr funs matches mutate mutate_at vars
 #' @importFrom magrittr "%>%"
 #' @export
 load_preprocessed_data <- function(model_data_folder, model_names){
@@ -42,7 +42,10 @@ load_preprocessed_data <- function(model_data_folder, model_names){
                           na.strings = c( "", "NA"), check.names = FALSE) %>%
       gather(year, value, matches(YEAR_PATTERN)) %>%
       # year needs to be numeric for subsequent interpolation to work
-      mutate(year=as.integer(year))
+      mutate(year=as.integer(year)) %>%
+      # All columns except for year and value should be characters
+      mutate_at(dplyr::vars(-year, -value),
+                funs(as.character))
   }
   names(data) <- model_names
   return(data)
@@ -713,7 +716,7 @@ prepare_transportenergy_t0_data <- function( country_data,
 #'   excluded elements will not be part of the reported total, and redundant categories (e.g., gasoline,
 #'   total liquid fuels) will be double counted.
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr group_by_ summarise ungroup bind_rows
+#' @importFrom dplyr distinct group_by_ summarise ungroup bind_rows
 #' @importFrom magrittr "%>%"
 #' @export
 aggregate_all_permutations <- function(input_data,
@@ -756,7 +759,13 @@ aggregate_all_permutations <- function(input_data,
                                    .dots = lapply(group_columns, as.symbol)) %>%
       summarise(value = sum(value)) %>%
       ungroup()
-    output_data <- bind_rows(output_data, output_aggregated_tech)
+
+    # Some of the model-provided categories may be dropped at this stage
+    tech_fuel_to_drop <- filter(tech_fuel_aggregations, Drop_orig) %>%
+      select(tech_fuel_joinvars) %>%
+      distinct()
+    output_data <- anti_join(output_data, tech_fuel_to_drop, by = tech_fuel_joinvars) %>%
+      bind_rows(output_aggregated_tech)
   }
 
   # Perform the individually aggregated (collapsed) variables
