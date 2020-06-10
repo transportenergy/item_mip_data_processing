@@ -4,8 +4,12 @@
 \alias{prepare_transportenergy_t0_data}
 \title{Generate base-year transportation dataset from which to construct the transport energy downscaling proxy}
 \usage{
-prepare_transportenergy_t0_data(country_data, use_modal_detail = TRUE,
-  mode_mapping_fn = "downscale/map_mode_IEA.csv", ...)
+prepare_transportenergy_t0_data(
+  country_data,
+  use_modal_detail = TRUE,
+  mode_mapping_fn = "downscale/map_mode_IEA.csv",
+  ...
+)
 }
 \arguments{
 \item{datafile}{data table with transportation energy consumption}

@@ -4,12 +4,17 @@
 \alias{generate_ds_proxy_data}
 \title{Generate country-level data for each socioeconomic realization and downscaling proxy}
 \usage{
-generate_ds_proxy_data(pop_data_fn = "downscale/SSP_Population.csv",
+generate_ds_proxy_data(
+  pop_data_fn = "downscale/SSP_Population.csv",
   gdp_data_fn = "downscale/SSP_GDP_PPP.csv",
   transportenergy_data_t0_fn = "downscale/IEA_trn_ctry.csv",
-  use_modal_detail = TRUE, apply_modal_elasticities = TRUE,
-  save_output = TRUE, create_dir = TRUE, output_dir = DS_OUTPUT_DIR,
-  ...)
+  use_modal_detail = TRUE,
+  apply_modal_elasticities = TRUE,
+  save_output = TRUE,
+  create_dir = TRUE,
+  output_dir = DS_OUTPUT_DIR,
+  ...
+)
 }
 \arguments{
 \item{pop_data_fn}{file name of data with population by scenario, country, year (including future iTEM years)}

@@ -4,8 +4,12 @@
 \alias{extract_global_data_to_df}
 \title{Extract global data from model-specific data list to a data frame.}
 \usage{
-extract_global_data_to_df(model_data, input_region_col = "Region",
-  output_region_col = "Region", ...)
+extract_global_data_to_df(
+  model_data,
+  input_region_col = "Region",
+  output_region_col = "Region",
+  ...
+)
 }
 \arguments{
 \item{model_data}{list of model-specific data frames from which to extract the global data}

@@ -4,9 +4,12 @@
 \alias{aggregate_item_regions}
 \title{Aggregate country-level quantity flow data to iTEM analysis regions}
 \usage{
-aggregate_item_regions(downscaled_data,
+aggregate_item_regions(
+  downscaled_data,
   item_region_map = load_country_region_mappings()[["item"]],
-  compute_global_totals = FALSE, ...)
+  compute_global_totals = FALSE,
+  ...
+)
 }
 \arguments{
 \item{downscaled_data}{data frame with downscaled (i.e. country-level) data. Can also include global totals, assigned

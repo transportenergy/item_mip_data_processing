@@ -4,10 +4,13 @@
 \alias{aggregate_all_permutations}
 \title{Aggregate across selected categories of quantity flow data, looping through all permutations}
 \usage{
-aggregate_all_permutations(input_data,
+aggregate_all_permutations(
+  input_data,
   collapse_vars = ITEM_IDVARS_WITH_ALLS,
   mode_service_fn = "downscale/aggregations_serv_mode_veh.csv",
-  tech_fuel_fn = "downscale/aggregations_tech_fuel_liq.csv", ...)
+  tech_fuel_fn = "downscale/aggregations_tech_fuel_liq.csv",
+  ...
+)
 }
 \arguments{
 \item{input_data}{data table with quantity (flow) variables}

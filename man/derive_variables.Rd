@@ -4,9 +4,13 @@
 \alias{derive_variables}
 \title{Derive new variables from existing variables in a dataset}
 \usage{
-derive_variables(model_data_df,
+derive_variables(
+  model_data_df,
   mapping = get_variable_mapping("downscale/indicators.csv"),
-  drop_weighted_indicators = FALSE, bind_derived_data = TRUE, ...)
+  drop_weighted_indicators = FALSE,
+  bind_derived_data = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model_data_df}{data frame with pre-processed/corrected iTEM data in the appropriate format}

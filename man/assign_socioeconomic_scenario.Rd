@@ -4,9 +4,14 @@
 \alias{assign_socioeconomic_scenario}
 \title{Assign country-level socioeconomic realization to each model+scenario}
 \usage{
-assign_socioeconomic_scenario(model_data_list, country_region_map_list,
-  socio_assign_method = "SSE", SSE_variable = "PPP-GDP",
-  socio_assignment_folder = NA, ...)
+assign_socioeconomic_scenario(
+  model_data_list,
+  country_region_map_list,
+  socio_assign_method = "SSE",
+  SSE_variable = "PPP-GDP",
+  socio_assignment_folder = NA,
+  ...
+)
 }
 \arguments{
 \item{model_data_list}{list of data tables of model-specific pre-processed, prepared data}

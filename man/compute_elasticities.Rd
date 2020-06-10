@@ -4,10 +4,16 @@
 \alias{compute_elasticities}
 \title{Compute elasticities from downscaled iTEM dataset}
 \usage{
-compute_elasticities(item_data,
+compute_elasticities(
+  item_data,
   number_variable = "Passenger Activity per capita",
-  base_variable = "GDP per capita", year_range = c(2010, 2050),
-  models = "All", regions = "Global", return_boxplot = TRUE, ...)
+  base_variable = "GDP per capita",
+  year_range = c(2010, 2050),
+  models = "All",
+  regions = "Global",
+  return_boxplot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{number_variable}{number of the logarithm}

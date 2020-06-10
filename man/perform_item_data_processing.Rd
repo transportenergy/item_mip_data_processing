@@ -4,9 +4,16 @@
 \alias{perform_item_data_processing}
 \title{Perform iTEM data processing, producing region- and/or country-level database(s) from submitted model output}
 \usage{
-perform_item_data_processing(model_data_folder, model_names, output_folder,
-  write_item_region_data = TRUE, write_item_country_data = FALSE,
-  return_output = FALSE, spread_by_years = TRUE, ...)
+perform_item_data_processing(
+  model_data_folder,
+  model_names,
+  output_folder,
+  write_item_region_data = TRUE,
+  write_item_country_data = FALSE,
+  return_output = FALSE,
+  spread_by_years = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model_data_folder}{folder where the pre-processed model output data is located}
