@@ -1032,6 +1032,7 @@ derive_variables <- function(model_data_df,
 perform_item_data_processing <- function(model_data_folder,
                                          model_names,
                                          output_folder,
+                                         non_global_models = NA_character_,
                                          write_item_region_data = TRUE,
                                          write_item_country_data = FALSE,
                                          return_output = FALSE,
@@ -1039,6 +1040,7 @@ perform_item_data_processing <- function(model_data_folder,
   assert_that(is.character(model_data_folder))
   assert_that(is.character(model_names))
   assert_that(is.character(output_folder))
+  assert_that(is.character(non_global_models))
   assert_that(is.logical(write_item_region_data))
   assert_that(is.logical(write_item_country_data))
   assert_that(is.logical(return_output))
@@ -1056,8 +1058,10 @@ perform_item_data_processing <- function(model_data_folder,
     item_region_data <- aggregate_item_regions(downscaled_data) %>%
       aggregate_all_permutations(...) %>%
       derive_variables(drop_weighted_indicators = TRUE, ...) %>%
-      mutate(Region = if_else(Region == "All", "Global", Region),
-             value = signif(value, SIGNIFICANT_FIGURES))
+      mutate(Model = tolower(Model),
+             Region = if_else(Region == "All", "Global", Region),
+             value = signif(value, SIGNIFICANT_FIGURES)) %>%
+      filter(!(Model %in% non_global_models & Region == "Global"))
     if(spread_by_years) item_region_data <- spread(item_region_data, key = year, value = value)
     print("Generating database at the level of iTEM regions")
     if(return_output) output_list[['item_region_data']] <- item_region_data

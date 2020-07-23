@@ -8,6 +8,7 @@ perform_item_data_processing(
   model_data_folder,
   model_names,
   output_folder,
+  non_global_models = NA_character_,
   write_item_region_data = TRUE,
   write_item_country_data = FALSE,
   return_output = FALSE,

@@ -7,18 +7,19 @@
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr left_join
 #' @importFrom readr read_csv
+#' @importFrom tibble is_tibble
 #' @importFrom tidyr complete gather nesting spread
 #' @export
 build_ipcc_template <- function(item_data_fn,
-                                item_data = NA,
+                                item_data = NULL,
                                 ipcc_mapping_fn = "ipcc/item_to_ipcc_mapping.csv",
                                 output_folder){
 
   assert_that(is.character(item_data_fn))
   assert_that(is.character(ipcc_mapping_fn))
 
-  if(!is.na(item_data)){
-    assert_that(is.tibble(item_data))
+  if(!is.null(item_data)){
+    assert_that(is_tibble(item_data))
   } else {
     item_data <- read_csv(item_data_fn)
   }
