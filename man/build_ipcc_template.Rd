@@ -6,7 +6,7 @@
 \usage{
 build_ipcc_template(
   item_data_fn,
-  item_data = NA,
+  item_data = NULL,
   ipcc_mapping_fn = "ipcc/item_to_ipcc_mapping.csv",
   output_folder
 )

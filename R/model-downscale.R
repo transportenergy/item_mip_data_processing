@@ -45,7 +45,7 @@ load_preprocessed_data <- function(model_data_folder, model_names){
       mutate(year=as.integer(year)) %>%
       # All columns except for year and value should be characters
       mutate_at(dplyr::vars(-year, -value),
-                funs(as.character))
+                as.character)
   }
   names(data) <- model_names
   return(data)
@@ -81,7 +81,7 @@ load_preprocessed_data <- function(model_data_folder, model_names){
 #'   variables, though such capacity may be added for an expanded variable set. For example, to process fuel prices,
 #'   fuel expenditures would be calculated as reported prices times consumption.
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr bind_rows filter group_by if_else mutate pull ungroup
+#' @importFrom dplyr bind_rows filter group_by_at if_else mutate pull ungroup
 #' @importFrom magrittr "%>%"
 #' @export
 prepare_preprocessed_data <- function(model_data_list,
@@ -149,7 +149,7 @@ prepare_preprocessed_data <- function(model_data_list,
       if(length(years_to_interpolate) > 0){
         print( paste0( "Interpolating years ", paste(years_to_interpolate, collapse = ', '), " from model: ", model ))
         model_data_list[[model]] <- model_data_list[[model]] %>%
-          group_by_(.dots = ITEM_ID_COLUMNS[ ITEM_ID_COLUMNS != "year"]) %>%
+          group_by_at(ITEM_ID_COLUMNS[ ITEM_ID_COLUMNS != "year"]) %>%
           complete(year = model_item_years) %>%
           mutate(value = approx_fun(year, value)) %>%
           ungroup()
@@ -173,7 +173,7 @@ prepare_preprocessed_data <- function(model_data_list,
       #don't want to be adding indicator variables
       assert_that(subset_quantity_flows)
       model_data_list[[model]] <- model_data_list[[model]] %>%
-        group_by_(.dots = lapply(ITEM_ID_COLUMNS, as.symbol)) %>%
+        group_by_at(ITEM_ID_COLUMNS) %>%
         summarise( value = sum(value)) %>%
         ungroup()
     }
@@ -204,7 +204,7 @@ prepare_preprocessed_data <- function(model_data_list,
 #'   Finally, all reported quantity variables must be assigned to a downscaling proxy in \code{variable_ds_proxy_fn}
 #'   that is also available in \code{country_share_list}.
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr right_join left_join select mutate filter select_ arrange_ bind_rows group_by_ summarise ungroup
+#' @importFrom dplyr right_join left_join select mutate filter arrange across bind_rows group_by summarise ungroup
 #' @importFrom magrittr "%>%"
 #' @export
 downscale_flow_variables <- function(model_data_list,
@@ -247,12 +247,12 @@ downscale_flow_variables <- function(model_data_list,
                   by = join_fields, suffix = c("_reg_total", "_country_share")) %>%
         filter(!is.na(iso)) %>%
         mutate(value = value_reg_total * value_country_share) %>%
-        select_(.dots = lapply(DS_DATA_COLUMNS, as.symbol))
+        select(DS_DATA_COLUMNS)
     } #end for(proxy_name in names(country_share_list[[model_name]]))
     # Bind the different proxies within each model
     downscaled_data_list[[model_name]] <-
       do.call(bind_rows, downscaled_data_list[[model_name]]) %>%
-      arrange_(.dots = lapply(DS_DATA_COLUMNS, as.symbol))
+      arrange(across(DS_DATA_COLUMNS))
   } # end for( model_name in names(model_data_list))
   if(collapse_list){
     downscaled_data <- do.call(bind_rows, downscaled_data_list)
@@ -282,7 +282,7 @@ downscale_flow_variables <- function(model_data_list,
 #'   downscale region-level model output to the country level. Returned data are filtered to the years reported by each
 #'   model, and include all possible nation-level socioeconomic realizations.
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr group_by_ summarise select mutate ungroup filter left_join rename
+#' @importFrom dplyr group_by_at summarise select mutate ungroup filter left_join rename
 #' @importFrom magrittr "%>%"
 #' @importFrom readr write_csv
 #' @export
@@ -320,7 +320,7 @@ compute_country_shares <- function(model_data_list,
       group_columns <- names(ds_proxy_region)[!names(ds_proxy_region) %in% c("value", "iso")]
       # Convert character vector to list of symbols
       ds_proxy_region <- ds_proxy_region %>%
-        group_by_(.dots = lapply(group_columns, as.symbol)) %>%
+        group_by_at(group_columns) %>%
         summarise(reg_total = sum(value)) %>%
         ungroup()
       output_list[[model_name]][[ds_proxy_name]] <- ds_proxy_data[[ds_proxy]] %>%
@@ -338,7 +338,7 @@ compute_country_shares <- function(model_data_list,
         # Create the directory if called for
         if(create_dir) dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
         write_csv(output_list[[model_name]][[ds_proxy_name]],
-                  path = paste0(output_dir, "/country_shares_", model_name, "_", ds_proxy_name, ".csv"))
+                  file = paste0(output_dir, "/country_shares_", model_name, "_", ds_proxy_name, ".csv"))
       } # end if(save_output)
     } # end for(ds_proxy in names(ds_proxy_data))
   } # end for(model_name in model_names)
@@ -586,7 +586,7 @@ generate_ds_proxy_data <- function(pop_data_fn = "downscale/SSP_Population.csv",
     if(create_dir) dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
     for(proxy_table in names(proxy_list)){
       write_csv(proxy_list[[proxy_table]],
-                path = paste0(output_dir, "/",names(proxy_list[proxy_table]), ".csv"))
+                file = paste0(output_dir, "/",names(proxy_list[proxy_table]), ".csv"))
     }
   }
   return(proxy_list)
@@ -716,7 +716,7 @@ prepare_transportenergy_t0_data <- function( country_data,
 #'   excluded elements will not be part of the reported total, and redundant categories (e.g., gasoline,
 #'   total liquid fuels) will be double counted.
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr distinct group_by_ summarise ungroup bind_rows
+#' @importFrom dplyr distinct group_by_at summarise ungroup bind_rows
 #' @importFrom magrittr "%>%"
 #' @export
 aggregate_all_permutations <- function(input_data,
@@ -741,8 +741,8 @@ aggregate_all_permutations <- function(input_data,
       inner_join(mode_service_aggregations, by = serv_mode_joinvars) %>%
       select(-serv_mode_joinvars)
     names(output_aggregated_serv) <- gsub("rev_", "", names(output_aggregated_serv))
-    output_aggregated_serv <- group_by_(output_aggregated_serv,
-                                   .dots = lapply(group_columns, as.symbol)) %>%
+    output_aggregated_serv <- group_by_at(output_aggregated_serv,
+                                          group_columns) %>%
       summarise(value = sum(value)) %>%
       ungroup()
     output_data <- bind_rows(output_data, output_aggregated_serv)
@@ -755,8 +755,8 @@ aggregate_all_permutations <- function(input_data,
       inner_join(tech_fuel_aggregations, by = tech_fuel_joinvars) %>%
       select(-tech_fuel_joinvars)
     names(output_aggregated_tech) <- gsub("rev_", "", names(output_aggregated_tech))
-    output_aggregated_tech <- group_by_(output_aggregated_tech,
-                                   .dots = lapply(group_columns, as.symbol)) %>%
+    output_aggregated_tech <- group_by_at(output_aggregated_tech,
+                                          group_columns) %>%
       summarise(value = sum(value)) %>%
       ungroup()
 
@@ -779,7 +779,7 @@ aggregate_all_permutations <- function(input_data,
       if(nrow(output_thisvar) > 0){
         output_thisvar[[var]] <- "All"
         output_thisvar <- output_thisvar %>%
-          group_by_(.dots = lapply(group_columns, as.symbol)) %>%
+          group_by_at(group_columns) %>%
           summarise(value = sum(value)) %>%
           ungroup()
         output_data <- bind_rows(output_data, output_thisvar)
@@ -792,7 +792,7 @@ aggregate_all_permutations <- function(input_data,
   # potentially different data values. Differences may be due to aggregated rounding errors, or data that is simply
   # unreported for selected variables at a given level of aggregation. This step drops redundant rows, and assumes that
   # where all ID information is identical, the higher value is the correct one to report.
-  output_data <- group_by_(output_data, .dots = lapply(group_columns, as.symbol)) %>%
+  output_data <- group_by_at(output_data, group_columns) %>%
     summarise(value = max(value)) %>%
     ungroup()
 
@@ -891,7 +891,7 @@ extract_global_data_to_df <- function(model_data, input_region_col = "Region",
 #' @details The mapping from ISO code to iTEM region is user-specified with a provided default.
 #' @importFrom assertthat assert_that
 #' @importFrom magrittr "%>%"
-#' @importFrom dplyr left_join group_by_ summarise ungroup
+#' @importFrom dplyr left_join group_by_at summarise ungroup
 #' @export
 aggregate_item_regions <- function(downscaled_data,
                                    item_region_map = load_country_region_mappings()[['item']],
@@ -906,7 +906,7 @@ aggregate_item_regions <- function(downscaled_data,
   region_data <- downscaled_data %>%
     filter(iso != "All") %>%
     left_join(item_region_map, by = "iso") %>%
-    group_by_(.dots = lapply(ITEM_ID_COLUMNS, as.symbol)) %>%
+    group_by_at(ITEM_ID_COLUMNS) %>%
     summarise(value = sum(value)) %>%
     ungroup() %>%
     bind_rows(global_data)
@@ -954,7 +954,7 @@ derive_variables <- function(model_data_df,
     join_byvars <- unlist(strsplit(mapping$join_byvars[i], ","))
     model_data_var1 <- subset( model_data_df, Variable == mapping$var1[i])
     model_data_var2 <- subset(model_data_df, Variable == mapping$var2[i]) %>%
-      select_(.dots = c(join_byvars, "value"))
+      select(c(join_byvars, "value"))
 
     # The operations allowed are +, *, and /
     assert_that(mapping$operation[i] %in% c("+", "*", "/"))
